@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>图片加密解密工具</title>
+<meta charset="utf-8" />
+<script src="./script/require.js" data-main="main"></script>
+<script>
+    require.config({
+        baseUrl: '/script',
+        paths: {
+            'jquery': 'jquery',
+            'crypto': 'crypto',
+        },
+    });
+</script>
+<style>
+    canvas{border: 1px solid #d3d3d3};
+</style>
+</head>
+<body>
+
+<h2>图片加密解密工具</h2>
+
+<div id="loading">
+正在加载必要的程序组件，请稍候。
+如果长时间无反应，请检查浏览器是否已经启用了javascript。
+</div>
+
+<div id="loaded" style="display: none">
+
+    <div>当前本系统只能处理最大512像素宽度的图片。超出会被自动缩小。如果在处理一个图片后，需要加载另一个不同尺寸比例的图片，建议刷新网页（否则缩放比例不正确。这是一个bug）</div>
+    <hr />
+    <div>您可以手动选择文件，也可以直接将图片拖动到下面的框中。<input id="selectSrc" type="file"></input></div>
+    <canvas width="480" height="320" id="preview"></canvas>
+
+    
+    
+    <img id="srcimg" style="display: none"></img>
+    <span id="cache" style="display: none"></span>
+    <span id="result"></span>
+
+    <div>
+        输入密码（字母、数字、特殊字符）：
+        <input type="text" size="20" id="password"/>
+        <button id="do" type="button">加密</button>
+        <button id="reverse" type="button">解密</button>
+    </div>
+
+</div>
+
+</body>
+</html>
