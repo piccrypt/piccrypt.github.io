@@ -162,8 +162,22 @@ function massMapper(img, canvasIDs){
         getArrayFromSrc(sid, srcTempAry);
 
         // do convert from srcTempAry to outTempAry
-        for(var i=0; i<srcTempAry.length; i++)
-            outTempAry[i] = srcTempAry[i];
+
+        var i=0, j, p, ox, oy;
+        for(var y=0; y<gridsize; y++){
+            if(vflip) oy = gridsize - 1 - y; else oy = y;
+            for(var x=0; x<gridsize; x++){
+                if(hflip) ox = gridsize - 1 - x; else ox = x;
+                j = oy * gridsize * 4 + ox * 4;
+                for(var p=0; p<4; p++){
+                    if(p > 3) break;
+                    if(invert & (1 << p))
+                        outTempAry[j++] = 255 - srcTempAry[i++];
+                    else
+                        outTempAry[j++] = srcTempAry[i++];
+                };
+            };
+        };
 
         applyArrayToOut(oid, outTempAry);
     };
