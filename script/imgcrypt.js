@@ -105,69 +105,71 @@ function massMapper(img, canvasIDs){
         return h * w;
     };
 
-    this.add = function(sid, hflip, vflip, invert, oid){
-        var func = (function(
-            mw, // equal to w
-            mh, // equal to h
-            s,  // coordinate, table result for `src`
-            o,  // coordinate, table result for `out`
-            sc, // context of `src`
-            hc, // context of `Hctx`
-            vc, // context of `Vctx`
-            hvc, // context of `HVctx`
-            oc  // context of `out`
-        ){
-            return function(){
-                var sX = s[0], sY = s[1], oX = o[0], oY = o[1];
-                var dataSource;
-                if(hflip && vflip)
-                    dataSource = hvc;
-                else if(!hflip && vflip)
-                    dataSource = vc;
-                else if(!vflip && hflip)
-                    dataSource = hc;
-                else if(!vflip && !hflip)
-                    dataSource = sc;
+    /********************************************************************/
+    /* switch and process the grid.
+     *
+     * data from src is copied to a 256-byte array, and will be processed.
+     * then it will be applied to the output canvas.
+     */
 
-                if(hflip) sX = mw - 1 - sX;
-                if(vflip) sY = mh - 1 - sY;
+    var canvasSrcData = srcctx.getImageData(0, 0, width, height),
+        canvasOutData = outctx.getImageData(0, 0, width, height),
+        gridDataLen = 4 * gridsize * gridsize;
+        srcTempAry = new Uint8Array(gridDataLen),
+        outTempAry = new Uint8Array(gridDataLen);
 
-                var data = dataSource.getImageData(
-                    sX * gridsize,
-                    sY * gridsize,
-                    gridsize,
-                    gridsize
-                );
-
-                for(var i=0; i<data.data.length; i+=4){
-                    if(invert & 1) data.data[i] = 255 - data.data[i];
-                    if(invert & 2) data.data[i+1] = 255 - data.data[i+1];
-                    if(invert & 4) data.data[i+2] = 255 - data.data[i+2];
+    function getArrayFromSrc(sid, resultAry){
+        /*
+         * +++++++++++++++++++++++++++++++++++++++++++++++++++++
+         * +++++++++++++++++++++++++++++++++++++++++++++++++++++
+         * +++++++++++++++++++++++++++++++++++++++++++++++++++++
+         * ++++++++AXXXXX  <-- position of A: decided by pixels above and left
+         * ++++++++BXXXXX  <-- position of B: equals A's index plus row length
+         * ++++++++XXXXXX
+         */
+        var rowDataLen = width * 4,
+            start = table[sid][1] * gridsize * rowDataLen
+                  + table[sid][0] * gridsize * 4,
+            i = 0, t, x, y, p;
+        for(y=0; y<gridsize; y++){
+            t = start;
+            for(x=0; x<gridsize; x++){
+                for(p=0; p<4; p++){
+                    resultAry[i++] = canvasSrcData.data[t++];
                 };
-
-                oc.putImageData(
-                    data,
-                    oX * gridsize,
-                    oY * gridsize
-                );
             };
-        })(
-            w,
-            h,
-            table[sid],
-            table[oid],
-            srcctx,
-            cacheHctx,
-            cacheVctx,
-            cacheHVctx,
-            outctx
-        );
-        task.push(func);
+            start += rowDataLen; // move to begin of the next row
+        };
     };
 
-    this.begin = function(){
-        for(var i=0; i<task.length; i++) setTimeout(task[i], 6 * i);
-//        for(var i=0; i<100; i++) setTimeout(task[i], 1);
+    function applyArrayToOut(oid, sourceAry){
+        var rowDataLen = width * 4,
+            start = table[oid][1] * gridsize * rowDataLen
+                  + table[oid][0] * gridsize * 4,
+            i = 0, t, x, y, p;
+        for(y=0; y<gridsize; y++){
+            t = start;
+            for(x=0; x<gridsize; x++){
+                for(p=0; p<4; p++){
+                    canvasOutData.data[t++] = sourceAry[i++];
+                };
+            };
+            start += rowDataLen; // move to begin of the next row
+        };
+    };
+
+    this.add = function(sid, hflip, vflip, invert, oid){
+        getArrayFromSrc(sid, srcTempAry);
+
+        // do convert from srcTempAry to outTempAry
+        for(var i=0; i<srcTempAry.length; i++)
+            outTempAry[i] = srcTempAry[i];
+
+        applyArrayToOut(oid, outTempAry);
+    };
+
+    this.end = function(){
+        outctx.putImageData(canvasOutData, 0, 0);
     };
     
 
@@ -235,7 +237,7 @@ function imgcrypt(crypto, $, canvasIDs){
             };
         };
 
-        mapper.begin();
+        mapper.end();
     };
 
     function encrypt(img){
