@@ -185,7 +185,7 @@ function imgcrypt(crypto, $, canvasIDs){
             0: crypto.util.encoding('permutation', 'ascii').toArrayBuffer(),
             1: crypto.util.encoding('transformation', 'ascii').toArrayBuffer(),
         }[s];
-        var ret = new crypto.hash('BLAKE2s').pbkdf2(
+        var ret = new crypto.hash('WHIRLPOOL').pbkdf2(
             key,
             salt,
             1,
