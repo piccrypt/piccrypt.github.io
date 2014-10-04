@@ -25,15 +25,9 @@ function massMapper(img, canvasIDs){
     var gridsize = 8;
 
     var src = $('#' + canvasIDs.src),
-        cacheH = $('#' + canvasIDs.flipH),
-        cacheV = $('#' + canvasIDs.flipV),
-        cacheHV = $('#' + canvasIDs.flipHV),
         out = $('#' + canvasIDs.out);
         
     var srcctx = src[0].getContext('2d'),
-        cacheHctx = cacheH[0].getContext('2d'),
-        cacheVctx = cacheV[0].getContext('2d'),
-        cacheHVctx = cacheHV[0].getContext('2d'),
         outctx = out[0].getContext('2d');
 
     var width = srcctx.canvas.width, height = srcctx.canvas.height,
@@ -51,9 +45,6 @@ function massMapper(img, canvasIDs){
         which.clearRect(0, 0, width, height);
     };
     clearCtx(outctx);
-    clearCtx(cacheHctx);
-    clearCtx(cacheVctx);
-    clearCtx(cacheHVctx);
 
     function flipImage(ctx, flipH, flipV) {
         var scaleH = flipH ? -1 : 1, // Set horizontal scale to -1 if flip horizontal
@@ -66,11 +57,7 @@ function massMapper(img, canvasIDs){
         ctx.drawImage(img, posX, posY, width, height); // draw the image
         ctx.restore(); // Restore the last saved state
     };
-
     flipImage(srcctx, false, false);
-    flipImage(cacheHctx, true, false);
-    flipImage(cacheVctx, false, true);
-    flipImage(cacheHVctx, true, true);
 
     // draw 2 color blocks
 

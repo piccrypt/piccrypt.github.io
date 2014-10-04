@@ -204,17 +204,9 @@ function doer(reverse){
     var names = {
         src: 'srcCanvas',
         out: 'outCanvas',
-        flipH: 'flipHCanvas',
-        flipV: 'flipVCanvas',
-        flipHV: 'flipHVCanvas',
     };
 
 
-    $('#cache').empty()
-        .append($('<canvas>', { id: 'flipHCanvas', }))
-        .append($('<canvas>', { id: 'flipVCanvas', }))
-        .append($('<canvas>', { id: 'flipHVCanvas', }))
-    ;
     $('#result').empty()
         .append($('<canvas>', { id: 'outCanvas', }))
     ;
